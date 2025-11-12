@@ -1,0 +1,427 @@
+
+-- Migration script to check and add all missing columns from schema.ts
+-- This script ensures all columns defined in schema.ts exist in the database
+
+-- Categories table
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT '';
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS icon TEXT NOT NULL DEFAULT 'fa-folder';
+
+-- Products table
+ALTER TABLE products ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT '';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS sku TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS price DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(id);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS product_type INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS track_inventory BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS tax_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS tax_rate_name TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS price_includes_tax BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS after_tax_price DECIMAL(10,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS before_tax_price DECIMAL(18,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS floor VARCHAR(50) DEFAULT '1';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS zone VARCHAR(50) DEFAULT 'A';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS unit TEXT DEFAULT 'Cái';
+
+-- Transactions table
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS transaction_id TEXT;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS subtotal DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS tax DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS total DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'cash';
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS amount_received DECIMAL(10,2);
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS change DECIMAL(10,2);
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS cashier_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS invoice_id INTEGER REFERENCES invoices(id);
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS invoice_number VARCHAR(50);
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Transaction items table
+ALTER TABLE transaction_items ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE transaction_items ADD COLUMN IF NOT EXISTS transaction_id INTEGER REFERENCES transactions(id);
+ALTER TABLE transaction_items ADD COLUMN IF NOT EXISTS product_id INTEGER REFERENCES products(id);
+ALTER TABLE transaction_items ADD COLUMN IF NOT EXISTS product_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE transaction_items ADD COLUMN IF NOT EXISTS price DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE transaction_items ADD COLUMN IF NOT EXISTS quantity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE transaction_items ADD COLUMN IF NOT EXISTS total DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+
+-- Employees table
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS employee_id TEXT;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT '';
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'cashier';
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS hire_date TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Attendance records table
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS employee_id INTEGER REFERENCES employees(id);
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS clock_in TIMESTAMPTZ;
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS clock_out TIMESTAMPTZ;
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS break_start TIMESTAMPTZ;
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS break_end TIMESTAMPTZ;
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS total_hours DECIMAL(4,2);
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS overtime DECIMAL(4,2) DEFAULT 0.00;
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'present';
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE attendance_records ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Store settings table
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS store_name TEXT NOT NULL DEFAULT 'EDPOS 레스토랑';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS store_code TEXT;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS tax_id TEXT;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS business_type TEXT DEFAULT 'restaurant';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS pin_code TEXT;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS open_time TEXT DEFAULT '09:00';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS close_time TEXT DEFAULT '22:00';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS gold_threshold TEXT DEFAULT '300000';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS vip_threshold TEXT DEFAULT '1000000';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS price_includes_tax BOOLEAN DEFAULT false;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS default_floor TEXT DEFAULT '1';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS default_zone TEXT DEFAULT 'A';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS floor_prefix TEXT DEFAULT '층';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS zone_prefix TEXT DEFAULT '구역';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Suppliers table
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT '';
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS code TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS contact_person TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS tax_id TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS bank_account TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS payment_terms TEXT DEFAULT '30일';
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Purchase receipts table
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS receipt_number TEXT;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS supplier_id INTEGER REFERENCES suppliers(id);
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS employee_id INTEGER REFERENCES employees(id);
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS purchase_date DATE;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS actual_delivery_date DATE;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS purchase_type TEXT;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS subtotal DECIMAL(18,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS tax DECIMAL(18,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS total DECIMAL(18,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS is_paid BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS payment_method TEXT;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS payment_amount DECIMAL(18,2);
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE purchase_receipts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Purchase receipt items table
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS purchase_receipt_id INTEGER REFERENCES purchase_receipts(id);
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS product_id INTEGER REFERENCES products(id);
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS product_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS sku TEXT;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS quantity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS received_quantity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS unit_price DECIMAL(15,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS total DECIMAL(15,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS tax_rate DECIMAL(5,2) DEFAULT 0.00;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS discount_percent DECIMAL(5,2) DEFAULT 0.00;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(15,2) DEFAULT 0.00;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS row_order INTEGER DEFAULT 0;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE purchase_receipt_items ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Purchase receipt documents table
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS purchase_receipt_id INTEGER REFERENCES purchase_receipts(id);
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS file_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS original_file_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS file_type TEXT NOT NULL DEFAULT '';
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS file_size INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS file_path TEXT NOT NULL DEFAULT '';
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS uploaded_by INTEGER REFERENCES employees(id);
+ALTER TABLE purchase_receipt_documents ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Tables table
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS table_number VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS capacity INTEGER DEFAULT 4;
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'available';
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS floor VARCHAR(50) DEFAULT '1';
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS zone VARCHAR(50) DEFAULT 'A';
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS qr_code TEXT;
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE tables ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Orders table
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_number TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS table_id INTEGER REFERENCES tables(id);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS employee_id INTEGER REFERENCES employees(id);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_name TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_tax_code TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_count INTEGER DEFAULT 1;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS subtotal DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS tax DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS total DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'pending';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_paid BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS einvoice_status INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS template_number VARCHAR(50);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS symbol VARCHAR(20);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS invoice_number VARCHAR(50);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS sales_channel TEXT NOT NULL DEFAULT 'table';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS price_include_tax BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS ordered_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS served_at TIMESTAMPTZ;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Order items table
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS order_id INTEGER REFERENCES orders(id);
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS product_id INTEGER REFERENCES products(id);
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS quantity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS unit_price DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS total DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS discount DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS tax DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS price_before_tax DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- Customers table
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS customer_id TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT '';
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS tax_code TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS membership_tier TEXT DEFAULT 'bronze';
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS total_spent DECIMAL(12,2) DEFAULT 0;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS last_visit TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Point transactions table
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS customer_id INTEGER REFERENCES customers(id);
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS type VARCHAR(20) NOT NULL DEFAULT 'earned';
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS points INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS order_id INTEGER REFERENCES orders(id);
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS employee_id INTEGER REFERENCES employees(id);
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS previous_balance INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS new_balance INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE point_transactions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Inventory transactions table
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS product_id INTEGER REFERENCES products(id);
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS type VARCHAR(20) NOT NULL DEFAULT 'add';
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS quantity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS previous_stock INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS new_stock INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS invoice_id INTEGER;
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS invoice_number VARCHAR(50);
+ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS created_at VARCHAR(50) NOT NULL DEFAULT '';
+
+-- Invoices table
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS invoice_number VARCHAR(50);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS trade_number VARCHAR(50);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS template_number VARCHAR(50);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS symbol VARCHAR(20);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_id INTEGER REFERENCES customers(id);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_name VARCHAR(100) NOT NULL DEFAULT '';
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_tax_code VARCHAR(20);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_address TEXT;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(20);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_email VARCHAR(100);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS subtotal DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS tax DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS total DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS payment_method INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS invoice_date TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'draft';
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS einvoice_status INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS invoice_status INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Invoice items table
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS invoice_id INTEGER REFERENCES invoices(id);
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS product_id INTEGER REFERENCES products(id);
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS product_name VARCHAR(200) NOT NULL DEFAULT '';
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS quantity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS unit_price DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS total DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS tax_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00;
+
+-- E-invoice connections table
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS symbol VARCHAR(10) NOT NULL DEFAULT '';
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS tax_code VARCHAR(20) NOT NULL DEFAULT '';
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS login_id VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS password TEXT NOT NULL DEFAULT '';
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS software_name VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS login_url TEXT;
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS sign_method VARCHAR(20) NOT NULL DEFAULT 'Ký server';
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS cqt_code VARCHAR(20) NOT NULL DEFAULT 'Cấp nhật';
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS is_default BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE einvoice_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Printer configs table
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS name VARCHAR(100) NOT NULL DEFAULT '';
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS printer_type VARCHAR(50) NOT NULL DEFAULT 'thermal';
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS connection_type VARCHAR(50) NOT NULL DEFAULT 'usb';
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45);
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS port INTEGER DEFAULT 9100;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS mac_address VARCHAR(17);
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS paper_width INTEGER NOT NULL DEFAULT 80;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS print_speed INTEGER DEFAULT 100;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS is_employee BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS is_kitchen BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS copies INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS floor VARCHAR(50) DEFAULT '1';
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS zone VARCHAR(50) DEFAULT 'A';
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE printer_configs ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Invoice templates table
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS name VARCHAR(100) NOT NULL DEFAULT '';
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS template_number VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS template_code VARCHAR(50);
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS symbol VARCHAR(20) NOT NULL DEFAULT '';
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS use_ck BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS is_default BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+ALTER TABLE invoice_templates ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL;
+
+-- Income vouchers table
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS voucher_number VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS date VARCHAR(10) NOT NULL DEFAULT '';
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS amount NUMERIC(12,2) NOT NULL DEFAULT 0;
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS account VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS recipient VARCHAR(255) NOT NULL DEFAULT '';
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS receiver_name VARCHAR(255);
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS phone VARCHAR(20);
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS category VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE income_vouchers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Expense vouchers table
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS voucher_number VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS date VARCHAR(10) NOT NULL DEFAULT '';
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS amount NUMERIC(12,2) NOT NULL DEFAULT 0;
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS account VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS recipient VARCHAR(255) NOT NULL DEFAULT '';
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS receiver_name VARCHAR(255);
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS phone VARCHAR(20);
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS category VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS supplier_id INTEGER REFERENCES suppliers(id);
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE expense_vouchers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id);
+CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
+CREATE INDEX IF NOT EXISTS idx_products_is_active ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_products_floor ON products(floor);
+CREATE INDEX IF NOT EXISTS idx_products_zone ON products(zone);
+CREATE INDEX IF NOT EXISTS idx_transactions_transaction_id ON transactions(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_orders_table_id ON orders(table_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_sales_channel ON orders(sales_channel);
+CREATE INDEX IF NOT EXISTS idx_orders_customer_phone ON orders(customer_phone);
+CREATE INDEX IF NOT EXISTS idx_orders_customer_tax_code ON orders(customer_tax_code);
+CREATE INDEX IF NOT EXISTS idx_orders_is_paid ON orders(is_paid);
+CREATE INDEX IF NOT EXISTS idx_orders_invoice_number ON orders(invoice_number);
+CREATE INDEX IF NOT EXISTS idx_orders_template_number ON orders(template_number);
+CREATE INDEX IF NOT EXISTS idx_orders_symbol ON orders(symbol);
+CREATE INDEX IF NOT EXISTS idx_orders_discount ON orders(discount);
+CREATE INDEX IF NOT EXISTS idx_orders_price_include_tax ON orders(price_include_tax);
+CREATE INDEX IF NOT EXISTS idx_order_items_discount ON order_items(discount);
+CREATE INDEX IF NOT EXISTS idx_order_items_tax ON order_items(tax);
+CREATE INDEX IF NOT EXISTS idx_order_items_price_before_tax ON order_items(price_before_tax);
+CREATE INDEX IF NOT EXISTS idx_customers_customer_id ON customers(customer_id);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipts_receipt_number ON purchase_receipts(receipt_number);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipts_supplier_id ON purchase_receipts(supplier_id);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipts_is_paid ON purchase_receipts(is_paid);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipt_items_row_order ON purchase_receipt_items(purchase_receipt_id, row_order);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipt_documents_receipt_id ON purchase_receipt_documents(purchase_receipt_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_trade_number ON invoices(trade_number);
+CREATE INDEX IF NOT EXISTS idx_invoices_invoice_number ON invoices(invoice_number);
+CREATE INDEX IF NOT EXISTS idx_invoices_invoice_status ON invoices(invoice_status);
+CREATE INDEX IF NOT EXISTS idx_tables_floor ON tables(floor);
+CREATE INDEX IF NOT EXISTS idx_tables_zone ON tables(zone);
+CREATE INDEX IF NOT EXISTS idx_printer_configs_floor ON printer_configs(floor);
+CREATE INDEX IF NOT EXISTS idx_einvoice_connections_symbol ON einvoice_connections(symbol);
+CREATE INDEX IF NOT EXISTS idx_einvoice_connections_active ON einvoice_connections(is_active);
+CREATE INDEX IF NOT EXISTS idx_invoice_templates_symbol ON invoice_templates(symbol);
+CREATE INDEX IF NOT EXISTS idx_invoice_templates_default ON invoice_templates(is_default);
+
+-- Update existing data with default values where needed
+UPDATE products SET unit = 'Cái' WHERE unit IS NULL;
+UPDATE products SET floor = '1' WHERE floor IS NULL;
+UPDATE products SET zone = 'A' WHERE zone IS NULL;
+UPDATE tables SET floor = '1' WHERE floor IS NULL;
+UPDATE tables SET zone = 'A' WHERE zone IS NULL;
+UPDATE orders SET discount = 0.00 WHERE discount IS NULL;
+UPDATE order_items SET discount = 0.00 WHERE discount IS NULL;
+UPDATE order_items SET tax = 0.00 WHERE tax IS NULL;
+UPDATE order_items SET price_before_tax = 0.00 WHERE price_before_tax IS NULL;
+UPDATE store_settings SET default_zone = 'A' WHERE default_zone IS NULL;
+UPDATE store_settings SET default_floor = '1' WHERE default_floor IS NULL;
+UPDATE store_settings SET floor_prefix = '층' WHERE floor_prefix IS NULL;
+UPDATE store_settings SET zone_prefix = '구역' WHERE zone_prefix IS NULL;
+
+-- Log completion
+DO $$ 
+BEGIN
+    RAISE NOTICE 'Successfully checked and added all missing columns from schema.ts';
+END $$;
