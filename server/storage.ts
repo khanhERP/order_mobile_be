@@ -32,7 +32,7 @@ import {
   type InsertPurchaseReceipt,
   type InsertPurchaseReceiptItem,
   type InsertPurchaseReceiptDocument,
-} from "@shared/schema";
+} from "../shared/schema";
 import { db, dbManager, getTenantDatabase as getDbForTenant } from "./db";
 import {
   eq,
@@ -3126,7 +3126,7 @@ export class DatabaseStorage implements IStorage {
 
         try {
           // Import tables from schema
-          const { tables } = await import("@shared/schema");
+          const { tables } = await import("../shared/schema");
           console.log(`✅ Tables schema imported successfully`);
 
           // Check for other ACTIVE orders on the same table (excluding current order and paid/cancelled orders)
@@ -4295,7 +4295,7 @@ export class DatabaseStorage implements IStorage {
   async getEInvoiceConnections(tenantDb?: any): Promise<any[]> {
     const database = tenantDb || this.getSafeDatabase("getEInvoiceConnections");
     try {
-      const { eInvoiceConnections } = await import("@shared/schema");
+      const { eInvoiceConnections } = await import("../shared/schema");
       return await database
         .select()
         .from(eInvoiceConnections)
@@ -4309,7 +4309,7 @@ export class DatabaseStorage implements IStorage {
   async getEInvoiceConnection(id: number, tenantDb?: any): Promise<any> {
     const database = tenantDb || this.getSafeDatabase("getEInvoiceConnection");
     try {
-      const { eInvoiceConnections } = await import("@shared/schema");
+      const { eInvoiceConnections } = await import("../shared/schema");
       const [result] = await database
         .select()
         .from(eInvoiceConnections)
@@ -4325,7 +4325,7 @@ export class DatabaseStorage implements IStorage {
     const database =
       tenantDb || this.getSafeDatabase("createEInvoiceConnection");
     try {
-      const { eInvoiceConnections } = await import("@shared/schema");
+      const { eInvoiceConnections } = await import("../shared/schema");
 
       // Generate next symbol number
       const existingConnections = await this.getEInvoiceConnections(tenantDb);
@@ -4355,7 +4355,7 @@ export class DatabaseStorage implements IStorage {
     const database =
       tenantDb || this.getSafeDatabase("updateEInvoiceConnection");
     try {
-      const { eInvoiceConnections } = await import("@shared/schema");
+      const { eInvoiceConnections } = await import("../shared/schema");
       const [result] = await database
         .update(eInvoiceConnections)
         .set({ ...data, updatedAt: new Date() })
@@ -4372,7 +4372,7 @@ export class DatabaseStorage implements IStorage {
     const database =
       tenantDb || this.getSafeDatabase("deleteEInvoiceConnection");
     try {
-      const { eInvoiceConnections } = await import("@shared/schema");
+      const { eInvoiceConnections } = await import("../shared/schema");
       const result = await database
         .delete(eInvoiceConnections)
         .where(eq(eInvoiceConnections.id, id))

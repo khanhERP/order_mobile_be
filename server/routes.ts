@@ -38,7 +38,7 @@ import {
   employees,
   purchaseReceiptDocuments,
   paymentMethods,
-} from "@shared/schema";
+} from "../shared/schema";
 import { initializeSampleData, db } from "./db";
 import { registerTenantRoutes } from "./tenant-routes";
 import {

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import * as schema from "@shared/schema";
+import * as schema from "../shared/schema";
 import {
   categories,
   products,
@@ -15,7 +15,7 @@ import {
   storeSettings,
   suppliers,
   customers,
-} from "@shared/schema";
+} from "../shared/schema";
 import { sql } from "drizzle-orm";
 
 // Load environment variables from .env file with higher priority
