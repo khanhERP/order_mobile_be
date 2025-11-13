@@ -202,6 +202,11 @@ app.use((req, res, next) => {
     }
   });
 
+  // Default route
+  app.get("/", (req, res) => {
+    res.json({ message: "oke" });
+  });
+
   // Start WebSocket server for popup signals
   try {
     const wsModule = await import("./websocket-server");
